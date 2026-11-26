@@ -1,0 +1,38 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Main.dc.html": {
+      "expand": "fill",
+      "h": 1900,
+      "title": "Ranking (teste)",
+      "w": 1280,
+      "x": 0,
+      "y": 0,
+      "is_interactive": true
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-11-24T13:40:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "n1": {
+      "kind": "title1",
+      "maxW": 1280,
+      "text": "Ranking dos meus jogos favoritos",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    }
+  },
+  "order": [
+    "Main.dc.html"
+  ],
+  "pages": [],
+  "title": "Ranking dos Meus Jogos Favoritos"
+}

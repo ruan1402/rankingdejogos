@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Ranking dos jogos</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#14122B}
+button{font-family:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #FFB86B;outline-offset:2px}
+input::placeholder,textarea::placeholder{color:#8F8AB8}
+input[type=file]{font-family:inherit;font-size:14px;color:#C4C0E8;max-width:100%}
+input[type=file]::file-selector-button{height:44px;padding:0 18px;margin-right:14px;border:1px solid #FFB86B;border-radius:10px;background:transparent;color:#FFB86B;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:end}
+@keyframes popA{0%{transform:translateY(10px);box-shadow:0 0 0 2px #FFB86B}100%{transform:translateY(0);box-shadow:0 0 0 0 transparent}}
+@keyframes popB{0%{transform:translateY(10px);box-shadow:0 0 0 2px #FFB86B}100%{transform:translateY(0);box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.pod,.listrow{animation:none!important}}
+@media (max-width:600px){
+.podium{grid-template-columns:minmax(0,1fr);gap:16px}
+.pos1{order:-1}.pos2{order:0}.pos3{order:1}
+.step{height:56px!important;font-size:30px!important;border-radius:12px!important;padding-top:0!important;align-items:center!important}
+.listrow{flex-wrap:wrap}
+.barbox{width:100%!important;flex:1 1 100%!important}
+}
+</style>
+</helmet>
+<div style="background:#14122B;color:#F4F2FF;font-family:'DM Sans',system-ui,sans-serif;min-height:100%;padding:40px 24px 72px;box-sizing:border-box">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:48px">
+
+<header style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:13px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#FFB86B">Placar pessoal</span>
+<h1 style="margin:0;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:48px;line-height:1;letter-spacing:-0.02em;text-wrap:balance">Meus jogos favoritos</h1>
+</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<div style="padding:12px 18px;border-radius:12px;background:#1E1B3A;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:12px;color:#C4C0E8">Jogos no ranking</span>
+<span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;font-variant-numeric:tabular-nums">{{count}}</span>
+</div>
+<div style="padding:12px 18px;border-radius:12px;background:#1E1B3A;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:12px;color:#C4C0E8">Nota média</span>
+<span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;font-variant-numeric:tabular-nums">{{avg}}</span>
+</div>
+</div>
+</header>
+
+<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+
+<div style="flex:3 1 520px;min-width:0;display:flex;flex-direction:column;gap:56px">
+
+<section style="display:flex;flex-direction:column;gap:20px" aria-label="Pódio">
+<div class="podium">
+<sc-for list="{{podium}}" as="p" hint-placeholder-count="3">
+<div class="pod pos{{p.pos}}" style="display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0;padding:8px 8px 0;border-radius:24px;background:{{p.glow}};animation:{{p.anim}}">
+<sc-if value="{{p.isFirst}}" hint-placeholder-val="{{ true }}">
+<svg width="44" height="34" viewBox="0 0 44 34" fill="none" aria-hidden="true"><path d="M4 28L2 8l11 9 9-14 9 14 11-9-2 20z" fill="#F5C451" stroke="#C28F1F" stroke-width="2" stroke-linejoin="round"></path><rect x="5" y="29" width="34" height="4" rx="2" fill="#C28F1F"></rect></svg>
+</sc-if>
+<div style="width:{{p.coverSize}};height:{{p.coverSize}};border-radius:18px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:{{p.tagSize}};color:#fff;background:{{p.cover}};box-shadow:{{p.ring}}">{{p.tag}}</div>
+<div style="text-align:center;min-width:0;max-width:100%;font-weight:700;font-size:{{p.nameSize}};overflow-wrap:anywhere">{{p.name}}</div>
+<div style="padding:4px 14px;border-radius:999px;background:rgba(255,184,107,0.16);color:#FFD6A3;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums">Nota {{p.score}}</div>
+<div style="display:flex;gap:8px">
+<button type="button" onClick="{{p.up}}" disabled="{{p.upOff}}" aria-label="Subir {{p.name}} uma posição" style="width:44px;height:44px;border:0;border-radius:10px;background:#2D2A52;color:#F4F2FF;display:flex;align-items:center;justify-content:center;opacity:{{p.upOp}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></button>
+<button type="button" onClick="{{p.down}}" disabled="{{p.downOff}}" aria-label="Descer {{p.name}} uma posição" style="width:44px;height:44px;border:0;border-radius:10px;background:#2D2A52;color:#F4F2FF;display:flex;align-items:center;justify-content:center;opacity:{{p.downOp}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+</div>
+<div class="step" style="width:100%;height:{{p.height}};border-radius:14px 14px 0 0;background:{{p.medal}};display:flex;align-items:flex-start;justify-content:center;padding-top:14px;box-sizing:border-box;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:{{p.numSize}};color:#14122B;line-height:1">{{p.pos}}</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px" aria-label="Lista completa">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+<h2 style="margin:0;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px">Lista completa</h2>
+<span style="font-size:14px;color:#C4C0E8">Ordenada pela posição que você definir</span>
+</div>
+<sc-if value="{{note}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="padding:12px 16px;border-radius:12px;background:#17352B;color:#9FE8C4;font-size:15px;line-height:1.4">{{note}}</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{rows}}" as="g" hint-placeholder-count="7">
+<div class="listrow" style="display:flex;align-items:center;gap:16px;padding:12px 16px;border-radius:14px;background:{{g.rowBg}};animation:{{g.anim}}">
+<span style="width:32px;text-align:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#C4C0E8;font-variant-numeric:tabular-nums">{{g.pos}}</span>
+<div style="width:48px;height:48px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#fff;background:{{g.cover}}">{{g.tag}}</div>
+<div style="flex:1;min-width:140px;display:flex;flex-direction:column;gap:6px">
+<span style="font-weight:700;font-size:16px">{{g.name}}</span>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+<span style="font-size:13px;color:#C4C0E8">{{g.gen}}</span>
+<sc-for list="{{g.chips}}" as="c" hint-placeholder-count="1">
+<span style="padding:2px 10px;border-radius:999px;background:#2D2A52;color:#E4E1FA;font-size:12px;font-weight:500">{{c.label}}</span>
+</sc-for>
+</div>
+</div>
+<div class="barbox" style="display:flex;flex-direction:column;gap:6px;width:120px;flex:none">
+<span style="font-weight:700;font-size:14px;text-align:right;font-variant-numeric:tabular-nums">{{g.score}}</span>
+<div style="height:6px;border-radius:3px;background:#2D2A52"><div style="height:6px;border-radius:3px;background:{{g.barColor}};width:{{g.bar}}"></div></div>
+</div>
+<div style="display:flex;gap:4px;flex:none">
+<button type="button" onClick="{{g.up}}" aria-label="Subir {{g.name}} uma posição" style="width:44px;height:44px;border:0;border-radius:10px;background:#2D2A52;color:#F4F2FF;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"></path></svg></button>
+<button type="button" onClick="{{g.down}}" disabled="{{g.downOff}}" aria-label="Descer {{g.name}} uma posição" style="width:44px;height:44px;border:0;border-radius:10px;background:#2D2A52;color:#F4F2FF;display:flex;align-items:center;justify-content:center;opacity:{{g.downOp}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<button type="button" onClick="{{g.remove}}" aria-label="Remover {{g.name}}" style="width:44px;height:44px;border:0;border-radius:10px;background:#2D2A52;color:#FF8A9B;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></button>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+</div>
+
+<aside style="flex:2 1 440px;min-width:0;max-width:100%;padding:36px;border-radius:24px;background:#1E1B3A;display:flex;flex-direction:column;gap:24px;box-sizing:border-box">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<h2 style="margin:0;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:32px">Adicionar jogo</h2>
+<span style="font-size:15px;color:#D6D2F2;line-height:1.4">Preencha os dados e ele entra no ranking de acordo com a nota.</span>
+</div>
+<span style="flex:none;padding:6px 14px;border-radius:999px;background:#2D2A52;color:#F4F2FF;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums">{{counter}}</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="f-nome" style="font-size:14px;font-weight:700;color:#C4C0E8">Nome do jogo</label>
+<input id="f-nome" type="text" value="{{nome}}" onInput="{{onNome}}" placeholder="Ex.: Celeste" style="height:56px;padding:0 18px;border-radius:12px;border:1px solid #3A3768;background:#14122B;color:#F4F2FF;font-family:inherit;font-size:17px;box-sizing:border-box;width:100%">
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<div style="display:flex;flex-direction:column;gap:6px;position:relative">
+<label for="f-gen" style="font-size:14px;font-weight:700;color:#C4C0E8">Gênero</label>
+<button id="f-gen" type="button" onClick="{{toggleGen}}" aria-haspopup="listbox" aria-expanded="{{genOpen}}" style="height:56px;width:100%;padding:0 18px;border-radius:12px;border:1px solid #3A3768;background:#14122B;font-size:17px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;color:{{genColor}}">
+<span>{{genLabel}}</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C0E8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<sc-if value="{{genOpen}}" hint-placeholder-val="{{ false }}">
+<div role="listbox" aria-label="Gênero" style="position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;padding:6px;border-radius:12px;border:1px solid #5A56A0;background:#14122B;box-shadow:0 14px 32px rgba(0,0,0,0.5);display:flex;flex-direction:column;gap:2px;max-height:300px;overflow-y:auto">
+<sc-for list="{{genres}}" as="ge" hint-placeholder-count="5">
+<button type="button" role="option" aria-selected="{{ge.sel}}" onClick="{{ge.pick}}" style="height:48px;flex:none;width:100%;padding:0 14px;border:0;border-radius:8px;background:{{ge.bg}};color:#F4F2FF;font-size:16px;text-align:left;font-weight:{{ge.fw}}">{{ge.v}}</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;position:relative">
+<label for="f-plat" style="font-size:14px;font-weight:700;color:#C4C0E8">Plataforma</label>
+<button id="f-plat" type="button" onClick="{{togglePlat}}" aria-haspopup="listbox" aria-expanded="{{platOpen}}" style="height:56px;width:100%;padding:0 18px;border-radius:12px;border:1px solid #3A3768;background:#14122B;font-size:17px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;color:{{platColor}}">
+<span>{{platLabel}}</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4C0E8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<sc-if value="{{platOpen}}" hint-placeholder-val="{{ false }}">
+<div role="listbox" aria-label="Plataforma" style="position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;padding:6px;border-radius:12px;border:1px solid #5A56A0;background:#14122B;box-shadow:0 14px 32px rgba(0,0,0,0.5);display:flex;flex-direction:column;gap:2px;max-height:260px;overflow-y:auto">
+<sc-for list="{{platforms}}" as="pl" hint-placeholder-count="3">
+<button type="button" role="option" aria-selected="{{pl.sel}}" onClick="{{pl.pick}}" style="height:48px;flex:none;width:100%;padding:0 14px;border:0;border-radius:8px;background:{{pl.bg}};color:#F4F2FF;font-size:16px;text-align:left;font-weight:{{pl.fw}}">{{pl.v}}</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="f-nota" style="font-size:14px;font-weight:700;color:#C4C0E8">Nota (0 a 10)</label>
+<input id="f-nota" type="text" inputmode="decimal" value="{{nota}}" onInput="{{onNota}}" placeholder="Ex.: 9,5" style="height:56px;padding:0 18px;border-radius:12px;border:1px solid #3A3768;background:#14122B;color:#F4F2FF;font-family:inherit;font-size:17px;box-sizing:border-box;width:100%">
+<span style="font-size:14px;color:#D6D2F2">A posição é automática: o jogo entra de acordo com a nota.</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;font-weight:700;color:#C4C0E8">Capa</span>
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:20px;border-radius:14px;border:1px dashed #5A56A0;background:#14122B">
+<div style="width:88px;height:88px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#C4C0E8;background:{{previewBg}}">
+<sc-if value="{{noImg}}" hint-placeholder-val="{{ true }}">
+<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-9 9"></path></svg>
+</sc-if>
+</div>
+<div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:10px">
+<span style="font-size:15px;color:#D6D2F2;line-height:1.45">Envie uma imagem. Sem imagem, o jogo ganha uma capa colorida com as iniciais.</span>
+<sc-if value="{{noImg}}" hint-placeholder-val="{{ true }}">
+<input id="f-capa" type="file" accept="image/*" onChange="{{onFile}}" aria-label="Enviar imagem de capa">
+</sc-if>
+<sc-if value="{{hasImg}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{removeImg}}" style="align-self:flex-start;height:44px;padding:0 18px;border:1px solid #5A56A0;border-radius:10px;background:transparent;color:#F4F2FF;font-weight:700;font-size:15px">Remover imagem</button>
+</sc-if>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="f-obs" style="font-size:14px;font-weight:700;color:#C4C0E8">Por que ele é favorito?</label>
+<textarea id="f-obs" rows="4" value="{{obs}}" onInput="{{onObs}}" placeholder="Escreva em poucas linhas o que faz esse jogo especial" style="padding:14px 18px;border-radius:12px;border:1px solid #3A3768;background:#14122B;color:#F4F2FF;font-family:inherit;font-size:17px;line-height:1.45;box-sizing:border-box;width:100%;resize:vertical"></textarea>
+</div>
+
+<sc-if value="{{msg}}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="padding:12px 16px;border-radius:12px;background:#3A2030;color:#FFB4C0;font-size:15px;line-height:1.4">{{msg}}</div>
+</sc-if>
+<button type="button" onClick="{{add}}" style="height:60px;border:0;border-radius:14px;background:#FFB86B;color:#14122B;font-weight:700;font-size:18px">Adicionar ao ranking</button>
+</aside>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1900}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = {
+games: [
+{ id: 1, name: 'Breath of the Wild', gen: 'Aventura', plat: 'Switch', score: 9.9, img: '', obs: '' },
+{ id: 2, name: 'Hollow Knight', gen: 'Metroidvania', plat: 'PC', score: 9.6, img: '', obs: '' },
+{ id: 3, name: 'Elden Ring', gen: 'RPG de ação', plat: 'PC', score: 9.4, img: '', obs: '' },
+{ id: 4, name: 'Stardew Valley', gen: 'Simulação', plat: 'PC', score: 9.3, img: '', obs: '' },
+{ id: 5, name: 'Hades', gen: 'Roguelike', plat: 'PC, Switch', score: 9.2, img: '', obs: '' },
+{ id: 6, name: 'Celeste', gen: 'Plataforma 2D', plat: 'Switch', score: 9.0, img: '', obs: '' },
+{ id: 7, name: 'Minecraft', gen: 'Sandbox', plat: 'PC', score: 8.8, img: '', obs: '' },
+{ id: 8, name: 'Portal 2', gen: 'Quebra-cabeça', plat: 'PC', score: 8.7, img: '', obs: '' },
+{ id: 9, name: 'The Witcher 3', gen: 'RPG de ação', plat: 'PC', score: 8.6, img: '', obs: '' },
+{ id: 10, name: 'Outer Wilds', gen: 'Exploração', plat: 'PC', score: 8.5, img: '', obs: '' }
+],
+nextId: 11, nome: '', gen: '', genOpen: false, plat: '', platOpen: false, nota: '', obs: '', img: '',
+msg: '', note: '', movedId: 0, tick: 0
+};
+}
+r1(n) { return Math.round(n * 10) / 10; }
+t10(n) { return Math.round(n * 10); }
+fit(g, i, dir) {
+const r1 = (n) => this.r1(n);
+const t10 = (n) => this.t10(n);
+if (dir < 0) {
+if (i + 1 < g.length) g[i].score = Math.min(10, Math.max(g[i].score, r1(g[i + 1].score + 0.1)));
+for (let k = i - 1; k >= 0; k--) {
+if (t10(g[k].score) < t10(g[k + 1].score) + 1) g[k].score = Math.min(10, r1(g[k + 1].score + 0.1)); else break;
+}
+} else {
+if (i > 0) g[i].score = Math.max(0, Math.min(g[i].score, r1(g[i - 1].score - 0.1)));
+for (let k = i + 1; k < g.length; k++) {
+if (t10(g[k].score) > t10(g[k - 1].score) - 1) g[k].score = Math.max(0, r1(g[k - 1].score - 0.1)); else break;
+}
+}
+}
+fmt(n) { return n.toFixed(1).replace('.', ','); }
+othersText(n) {
+if (n === 0) return '';
+return n === 1 ? ' 1 outra nota também foi ajustada.' : ' ' + n + ' outras notas também foram ajustadas.';
+}
+renderVals() {
+const st = this.state;
+const MAX = 10;
+const fmt = (n) => this.fmt(n);
+const palette = [['#3FA37A','#1E5C47'],['#5B7DB1','#2E3F66'],['#C2603E','#6E2B18'],['#7BA33F','#3D5A1C'],['#D14A5C','#6B1E2B'],['#8E6BD1','#43297A'],['#4FA3A8','#235559'],['#D9A23F','#7A5413'],['#7A8794','#38424D'],['#E0773E','#8A3416']];
+const tagOf = (g) => { if (g.img) return ''; const w = g.name.trim().split(/\s+/).filter(Boolean); return (w.length > 1 ? w[0][0] + w[1][0] : g.name.trim().slice(0, 2)).toUpperCase(); };
+const coverOf = (g) => { if (g.img) return '#14122B center / cover no-repeat url("' + g.img + '")'; const c = palette[g.id % palette.length]; return 'linear-gradient(135deg,' + c[0] + ',' + c[1] + ')'; };
+
+const move = (id, d) => () => {
+const cur = this.state;
+const g = cur.games.map((x) => Object.assign({}, x));
+const i = g.findIndex((x) => x.id === id);
+const j = i + d;
+if (j < 0 || j >= g.length) return;
+const before = {};
+g.forEach((x) => { before[x.id] = x.score; });
+const t = g[i]; g[i] = g[j]; g[j] = t;
+this.fit(g, j, d);
+let others = 0;
+g.forEach((x) => { if (x.id !== id && x.score !== before[x.id]) others++; });
+const me = g[j];
+let text = me.name + (d < 0 ? ' subiu' : ' desceu') + ' para a posição ' + (j + 1) + '.';
+if (me.score !== before[id]) text += ' Nota ajustada de ' + fmt(before[id]) + ' para ' + fmt(me.score) + '.';
+text += this.othersText(others);
+this.setState({ games: g, msg: '', note: text, movedId: id, tick: cur.tick + 1 });
+};
+const remove = (id) => () => {
+const cur = this.state;
+this.setState({ games: cur.games.filter((x) => x.id !== id), msg: '', note: '' });
+};
+const anim = (id) => (id === st.movedId ? ((st.tick % 2) ? 'popA 0.2s ease-out' : 'popB 0.2s ease-out') : 'none');
+const last = st.games.length - 1;
+
+const medals = [
+{ medal: 'linear-gradient(180deg,#F5C451,#C28F1F)', height: '210px', numSize: '72px', coverSize: '112px', tagSize: '36px', nameSize: '18px', ring: '0 0 0 3px #F5C451', glow: 'radial-gradient(ellipse at 50% 28%, rgba(245,196,81,0.28), rgba(245,196,81,0) 68%)' },
+{ medal: 'linear-gradient(180deg,#C9D1E0,#8E98AE)', height: '150px', numSize: '56px', coverSize: '88px', tagSize: '28px', nameSize: '16px', ring: 'none', glow: 'none' },
+{ medal: 'linear-gradient(180deg,#D98A55,#9A5A2E)', height: '110px', numSize: '48px', coverSize: '88px', tagSize: '28px', nameSize: '16px', ring: 'none', glow: 'none' }
+];
+const top = st.games.slice(0, 3).map((g, i) => Object.assign({
+pos: i + 1, isFirst: i === 0, name: g.name, tag: tagOf(g), score: fmt(g.score), cover: coverOf(g),
+up: move(g.id, -1), down: move(g.id, 1),
+upOff: i === 0, downOff: i === last, upOp: i === 0 ? '0.35' : '1', downOp: i === last ? '0.35' : '1',
+anim: anim(g.id)
+}, medals[i]));
+const podium = [top[1], top[0], top[2]].filter(Boolean);
+
+const rows = st.games.slice(3).map((g, k) => {
+const i = k + 3;
+return {
+pos: i + 1, tag: tagOf(g), name: g.name, gen: g.gen, score: fmt(g.score), bar: (g.score * 10) + '%',
+barColor: g.score > 9 ? '#FFB86B' : '#B9A8FF',
+rowBg: i <= 5 ? '#272350' : '#1E1B3A',
+cover: coverOf(g),
+chips: g.plat.split(',').map((p) => p.trim()).filter(Boolean).map((p) => ({ label: p })),
+up: move(g.id, -1), down: move(g.id, 1), remove: remove(g.id),
+downOff: i === last, downOp: i === last ? '0.35' : '1',
+anim: anim(g.id)
+};
+});
+
+const total = st.games.reduce((a, g) => a + g.score, 0);
+
+const set = {};
+['PC', 'Switch'].forEach((p) => { set[p] = true; });
+st.games.forEach((g) => g.plat.split(',').forEach((p) => { if (p.trim()) set[p.trim()] = true; }));
+const platforms = Object.keys(set).sort().map((v) => ({
+v, sel: st.plat === v, bg: st.plat === v ? '#2D2A52' : 'transparent', fw: st.plat === v ? '700' : '400',
+pick: () => this.setState({ plat: v, platOpen: false, genOpen: false })
+}));
+
+const gset = {};
+['Ação','Aventura','Arcade','Battle royale','Cartas','Corrida','Estratégia','Esportes','Exploração','FPS','Furtivo','Luta','Metroidvania','MMORPG','Mundo aberto','Musical','Narrativo','Plataforma 2D','Plataforma 3D','Quebra-cabeça','Roguelike','RPG','RPG de ação','Sandbox','Simulação','Sobrevivência','Souls-like','Terror','Tiro','Tower defense','Visual novel'].forEach((x) => { gset[x] = true; });
+st.games.forEach((g) => { if (g.gen && g.gen.trim()) gset[g.gen.trim()] = true; });
+const genres = Object.keys(gset).sort((a, b) => a.localeCompare(b, 'pt-BR')).map((v) => ({
+v, sel: st.gen === v, bg: st.gen === v ? '#2D2A52' : 'transparent', fw: st.gen === v ? '700' : '400',
+pick: () => this.setState({ gen: v, genOpen: false, platOpen: false })
+}));
+const onNota = (e) => {
+let v = e.target.value.replace(/[^0-9.,]/g, '');
+const m = v.match(/^(\d{0,2})(?:([.,])(\d?))?/);
+v = m[1] + (m[2] ? m[2] + m[3] : '');
+if (parseFloat(v.replace(',', '.')) > 10) v = '10';
+this.setState({ nota: v });
+};
+const on = (k) => (e) => this.setState({ [k]: e.target.value });
+
+const onFile = (e) => {
+const f = e.target.files && e.target.files[0];
+if (!f) return;
+if (!/^image\//.test(f.type)) { this.setState({ msg: 'Escolha um arquivo de imagem.' }); return; }
+const rd = new FileReader();
+rd.onload = () => {
+const im = new Image();
+im.onload = () => {
+const s = Math.min(1, 400 / Math.max(im.width, im.height));
+const c = document.createElement('canvas');
+c.width = Math.max(1, Math.round(im.width * s));
+c.height = Math.max(1, Math.round(im.height * s));
+c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+this.setState({ img: c.toDataURL('image/jpeg', 0.82), msg: '' });
+};
+im.src = rd.result;
+};
+rd.readAsDataURL(f);
+};
+
+const add = () => {
+const cur = this.state;
+if (cur.games.length >= MAX) { this.setState({ msg: 'O ranking já tem 10 jogos. Remova um para adicionar outro.' }); return; }
+const name = cur.nome.trim();
+if (!name) { this.setState({ msg: 'Digite o nome do jogo.' }); return; }
+const raw = parseFloat(cur.nota.replace(',', '.'));
+if (isNaN(raw) || raw < 0 || raw > 10) { this.setState({ msg: 'Digite uma nota entre 0 e 10.' }); return; }
+const score = Math.round(raw * 10) / 10;
+const g = cur.games.map((x) => Object.assign({}, x));
+let nat = g.findIndex((x) => x.score < score);
+if (nat < 0) nat = g.length;
+const at = nat;
+const item = { id: cur.nextId, name, gen: cur.gen, plat: cur.plat, score, img: cur.img, obs: cur.obs };
+g.splice(at, 0, item);
+let text = name + ' entrou na posição ' + (at + 1) + '.';
+this.setState({ games: g, nextId: cur.nextId + 1, nome: '', gen: '', genOpen: false, plat: '', platOpen: false, nota: '', obs: '', img: '', msg: '', note: text, movedId: item.id, tick: cur.tick + 1 });
+};
+
+return {
+podium, rows, platforms,
+count: String(st.games.length), avg: st.games.length ? fmt(total / st.games.length) : '0,0',
+counter: st.games.length + '/' + MAX + ' jogos',
+nome: st.nome, gen: st.gen, nota: st.nota, obs: st.obs, msg: st.msg, note: st.note,
+platOpen: st.platOpen, platLabel: st.plat || 'Selecione', platColor: st.plat ? '#F4F2FF' : '#8F8AB8',
+togglePlat: () => this.setState({ platOpen: !this.state.platOpen, genOpen: false }),
+genres, genOpen: st.genOpen, genLabel: st.gen || 'Selecione', genColor: st.gen ? '#F4F2FF' : '#8F8AB8',
+toggleGen: () => this.setState({ genOpen: !this.state.genOpen, platOpen: false }),
+hasImg: !!st.img, noImg: !st.img,
+previewBg: st.img ? '#14122B center / cover no-repeat url("' + st.img + '")' : '#2D2A52',
+removeImg: () => this.setState({ img: '' }),
+onNome: on('nome'), onNota, onObs: on('obs'), onFile, add
+};
+}
+}
+</script>
+</body>
+</html>
